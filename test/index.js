@@ -1,6 +1,7 @@
 /*
  * Test runner
  *
+ * Note: runTests(), which runs all tests, expects all test functions to return a promise
  */
 
 // Override the NODE_ENV variable
@@ -14,7 +15,7 @@ _app.tests = {};
 
 // Dependencies
 _app.tests.unit = require('./unit');
-// _app.tests.api = require('./api');
+_app.tests.integration = require('./integration');
 
 // Count all the tests
 _app.countTests = _ => {
@@ -30,16 +31,16 @@ _app.countTests = _ => {
 
 // Run a single test and collect the results from it
 _app.runTest = async (testCollection, testName) => {
-    const performTest = testCollection[testName];
+    const performTest = _app.tests[testCollection][testName];
     const testResult = { testName };
+    
     // Call the test
     try {
-        performTest(_ => {
-            // If it calls back without throwing, then it succeeded, so log it in green
-            console.log('\x1b[32m%s\x1b[0m', testName);
-            testResult.successful = true;
-            testResult.error = false;
-        });
+        await performTest();
+        // If it calls back without throwing, then it succeeded, so log it in green
+        console.log('\x1b[32m%s\x1b[0m', testName);
+        testResult.successful = true;
+        testResult.error = false;
     } catch (e) {
         // If it throws, then it failed, so capture the error thrown and log it in red
         console.log('\x1b[31m%s\x1b[0m', testName);
@@ -56,7 +57,7 @@ _app.runTests = async _ => {
     Object.keys(_app.tests).forEach(key => {
         let subTests = _app.tests[key];
         Object.keys(subTests).forEach(testName => {
-            tests.push(_app.runTest(subTests, testName));
+            tests.push(_app.runTest(key, testName));
         });
     });
 
@@ -91,7 +92,6 @@ _app.produceTestReport = testResults => {
     console.log("");
     console.log("--------END TEST REPORT--------");
     process.exit(0);
-
 };
 
 // Run the tests
