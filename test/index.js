@@ -17,18 +17,6 @@ _app.tests = {};
 _app.tests.unit = require('./unit');
 _app.tests.integration = require('./integration');
 
-// Count all the tests
-_app.countTests = _ => {
-    let counter = 0;
-    Object.keys(_app.tests).forEach(key => {
-        let subTests = _app.tests[key];
-        Object.keys(subTests).forEach(subTestKey => {
-            counter++;
-        });
-    });
-    return counter;
-};
-
 // Run a single test and collect the results from it
 _app.runTest = async (testCollection, testName) => {
     const performTest = _app.tests[testCollection][testName];
